@@ -1,7 +1,7 @@
 ﻿@if (initialised)
 {
     
-    <SfDashboardLayout CellAspectRatio="@System.Math.Round((16/8d),2)" ID="dashboard" CellSpacing="@(new double[] { 20, 20 })" Columns="3" AllowDragging="true" AllowResizing="true" EnablePersistence="true">
+    <SfDashboardLayout CellAspectRatio="@System.Math.Round((16/9d),2)" ID="dashboard" CellSpacing="@(new double[] { 20, 20 })" Columns="3" AllowDragging="true" AllowResizing="true" EnablePersistence="true">
         <DashboardLayoutPanels>
             @foreach (var panel in PanelItems)
             {
