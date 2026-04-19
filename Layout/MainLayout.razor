@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+
+@inject IMatchTrackerHttpService MatchService
+
+<FluentLayout>
+    <FluentHeader>
+        MatchStatCharts
+    </FluentHeader>
+    <FluentStack Class="main" Orientation="Microsoft.FluentUI.AspNetCore.Components.Orientation.Horizontal" Width="100%">
+        <NavMenu />
+        <FluentBodyContent Class="body-content">
+            <ErrorBoundary>
+                <ChildContent>
+                    <div class="content">
+                        @Body
+                    </div>
+                </ChildContent>
+                <ErrorContent Context="ex">
+                    <div class="blazor-error-boundary">@ex.Message</div>
+                </ErrorContent>
+            </ErrorBoundary>
+        </FluentBodyContent>
+    </FluentStack>
+</FluentLayout>
+
+

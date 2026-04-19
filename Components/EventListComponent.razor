@@ -1,0 +1,63 @@
+﻿
+
+@if (MatchEventList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    
+     <div id="ControlRegion">
+        <SfGrid ID="Grid1" DataSource="@MatchEventList" AllowPaging="false" AllowFiltering="true" AllowReordering="true" 
+                AllowResizing="true" AllowSorting="true" Height="750" Width="100%">
+            <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="Syncfusion.Blazor.Grids.EditMode.Normal"></GridEditSettings>
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+            
+
+            <GridColumns>
+
+                <GridColumn Field=id HeaderText="ID" IsPrimaryKey="true" ValidationRules="@(new ValidationRules { Required = true })" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Right" Width="120" />
+                <GridColumn Field=message HeaderText="Message" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Right" Width="130" />
+                <GridColumn Field=time HeaderText="Time"  Width="120" />
+                <GridColumn Field=period HeaderText="Period" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Left" Width="120" />
+                <GridColumn Field=team HeaderText="Team" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Left" Width="130" />
+                <GridColumn Field=action01.stat HeaderText="Stat" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Left" Width="120" />
+                <GridColumn Field=action02.stat HeaderText="Sub Stat" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Left" Width="150" />
+                <GridColumn Field=player.name HeaderText="Player" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Left" Width="130" />
+
+            </GridColumns>
+        </SfGrid>
+    </div>  
+    <br />
+    <br />
+   
+    <style>
+        .ulstyle {
+            margin: 0px;
+            padding-left: 20px;
+            display: inline-block;
+        }
+
+        .list {
+            float: left;
+            line-height: 20px;
+            margin: 10px;
+            min-width: 200px;
+        }
+    </style>
+
+}
+
+
+@code
+{
+    
+
+    SfGrid<MatchEvent>? DataGrid;
+
+    [Parameter]
+    public List<MatchEvent>? MatchEventList { get; set; }
+
+
+
+}

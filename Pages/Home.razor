@@ -1,0 +1,65 @@
+﻿@page "/"
+
+
+@inject IMatchTrackerHttpService MatchService
+
+<PageTitle>Home</PageTitle>
+@if (initialised is true)
+{
+    <SfTab HeaderPlacement="HeaderPosition.Top" LoadOn="ContentLoad.Dynamic" OverflowMode="@OverflowMode.Scrollable" ShowCloseButton="false" >
+        <TabItems>
+            <TabItem Content="Place here your content" >
+                @*Replace your required tab1 boby content here *@
+                <ChildContent>
+                    <TabHeader Text="Header1"></TabHeader> @*Replace your required header1 text here *@
+                </ChildContent>           
+            </TabItem>
+            <TabItem> 
+                <ChildContent>
+                    <TabHeader Text="Header2"></TabHeader> @*Replace your required header2 text here *@
+                </ChildContent>
+                <ContentTemplate>
+                    <EventListComponent MatchEventList="@Events" />
+                </ContentTemplate>
+            </TabItem>
+            <TabItem >
+                @*Replace your required tab1 boby content here *@
+                <ChildContent>
+                    <TabHeader Text="Header3"></TabHeader> @*Replace your required header1 text here *@
+                </ChildContent>
+                <ContentTemplate>
+                    <GraphsComponent Match="@Match" />
+                </ContentTemplate>
+            </TabItem>
+            <TabItem>              
+                <ChildContent>
+                    <TabHeader Text="Header4"></TabHeader> 
+                </ChildContent>
+                <ContentTemplate>
+                    <TestComponent></TestComponent>
+                </ContentTemplate>
+            </TabItem>
+        </TabItems>
+    </SfTab>
+}
+
+
+@code
+{
+    private bool initialised = false;
+    public static MatchDetails? Match = new();
+    public List<MatchEvent>? Events = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Match = await MatchService.GetMatch();
+        Console.WriteLine("MAtch Loaded"); 
+
+        Events = Match.Events.ToList();
+        Console.WriteLine("Event list loaded");
+        
+
+        initialised = true;
+    }
+}

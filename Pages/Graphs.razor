@@ -1,0 +1,163 @@
+﻿@page "/graphs"
+
+@using MatchStatCharts.Model
+@using MatchStatCharts.Services
+@using MatchStatCharts.Extensions
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Layouts
+
+
+@inject IMatchTrackerHttpService MatchService
+
+
+<h3>Graphs</h3>
+
+@if (initialised)
+{
+   
+    <SfDashboardLayout CellSpacing="@(new double[] { 20, 20})" Columns="3" AllowDragging="true" AllowResizing="true">
+        <DashboardLayoutPanels>
+            @foreach (var panel in PanelItems)
+            {
+                x = 0;            
+                <DashboardLayoutPanel Id="@panel.Id" Row="@panel.Row" Column="@panel.Column" SizeX=1 SizeY=1>
+                    <ContentTemplate>
+                        <SfAccumulationChart Title="@ChartList.ElementAt(PanelItems.IndexOf(panel)).ElementAt(x).Title" EnableAdaptiveRendering="true" Width="300px" Height="400px" EnableSmartLabels="true">
+                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                            <AccumulationChartSeriesCollection>
+                                <AccumulationChartSeries DataSource="@ChartList.ElementAt(PanelItems.IndexOf(panel))" Explode="true" XName="Team" YName="Count" Palettes="@Palette" StartAngle="180" Type="AccumulationType.Pie">
+                                 <AccumulationDataLabelSettings Visible="true"  Name="DataLabel">
+                                     <AccumulationChartDataLabelFont FontWeight="Bold"/>
+                                 </AccumulationDataLabelSettings>
+                              </AccumulationChartSeries>
+                            </AccumulationChartSeriesCollection>
+                        </SfAccumulationChart>
+                    </ContentTemplate>
+                </DashboardLayoutPanel>
+                x++;
+            }
+        </DashboardLayoutPanels>
+    </SfDashboardLayout>
+}
+    <style>
+	    .e-panel-content {
+			text-align: center;
+			margin-top: 10px;
+	    }
+    </style>    
+
+
+
+@code 
+{
+    int x;
+    public class PanelModel
+    {
+        public string Id { get; set; }
+        public int Row { get; set; } = 0;
+        public int Column { get; set; } = 0;       
+
+    }
+
+    private List<PanelModel> PanelItems = new List<PanelModel>
+    {
+        new PanelModel { Id = "panel1", Row = 0, Column = 0  },
+        new PanelModel { Id = "panel2", Row = 0, Column = 1  },
+        new PanelModel { Id = "panel3", Row = 0, Column = 2  },
+        new PanelModel { Id = "panel4", Row = 1, Column = 0  },
+        new PanelModel { Id = "panel5", Row = 1, Column = 1  },   
+        new PanelModel { Id = "panel6", Row = 1, Column = 2  },
+    };
+
+    private bool initialised = false;
+
+    public class ChartData
+    {
+        public static float RunningTotal { get; set; }
+        public string? Team { get; set; }
+        public double? Count { get; set; }
+        public string? DataLabel { get; set; } 
+        public string? Fill { get; set; }
+        public string? Title { get; set; }
+        public AccumulationType ChartType { get; set; }
+
+        public ChartData()
+        {
+            this.DataLabel = this.Count.ToString();
+        }
+    }
+
+    public string[] Palette { get; set; } = new string[] { "",""};
+
+    public static MatchDetails Match = new(); 
+
+    public List<ChartData> Points = new List<ChartData>();
+    public List<ChartData> Goals = new List<ChartData>();
+    public List<ChartData> Wides = new List<ChartData>();
+    public List<ChartData> Frees = new List<ChartData>();
+    public List<ChartData> Scores = new List<ChartData>();
+    public List<ChartData> Turnovers = new List<ChartData>();
+    public List<List<ChartData>> ChartList = new List<List<ChartData>>();
+
+    public static ChartData Team1 = new();
+    public ChartData Team2 = new();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        Match = await MatchService.GetMatch(); // Http.GetFromJsonAsync<MatchDetails>("Test Match 08.gaaapps.txt");
+
+        string team1 = Match.Scores.ATeam;
+        string team2 = Match.Scores.BTeam;
+        string color1 = Match.Settings.teamAColorBG;
+        string color2 = Match.Settings.teamBColorBG;
+        
+        int team1goals = Match.EventsByTeam(Match.Scores.ATeam).ToList().Where(e => e.action01.stat.StartsWith("goal")).Count();
+        int team2goals = Match.EventsByTeam(Match.Scores.BTeam).ToList().Where(e => e.action01.stat.StartsWith("goal")).Count();
+
+        int team1points = Match.EventsByTeam(Match.Scores.ATeam).ToList().Where(e => e.action01.stat.StartsWith("point")).Count();
+        int team2points = Match.EventsByTeam(Match.Scores.BTeam).ToList().Where(e => e.action01.stat.StartsWith("point")).Count();
+
+        int team1scores = team1points + (team1goals * 3);
+        int team2scores = team2points + (team2goals * 3);
+
+        int team1turnovers = Match.EventsByTeam(Match.Scores.ATeam).ToList().Where(e => e.action01.stat.StartsWith("turnover")).Count();
+        int team2turnovers = Match.EventsByTeam(Match.Scores.BTeam).ToList().Where(e => e.action01.stat.StartsWith("turnover")).Count();
+
+        Palette[0] = color1;
+        Palette[1] = color2;
+
+
+        Frees.Add(new ChartData { Team = team1, Count = (Match.EventsByTeam(Match.Scores.ATeam).ToList()).Where(e => e.action01.stat.StartsWith("free")).Count(), Fill=color1, Title="Frees Chart", ChartType=AccumulationType.Pie });
+        Frees.Add(new ChartData { Team = team2, Count = (Match.EventsByTeam(Match.Scores.BTeam).ToList()).Where(e => e.action01.stat.StartsWith("free")).Count(), Fill = color2, Title = "Frees Chart", ChartType = AccumulationType.Pie });
+
+        Goals.Add(new ChartData { Team = team1, Count = team1goals, Fill = color1, Title = "Goals Chart", ChartType = AccumulationType.Pie });
+        Goals.Add(new ChartData { Team = team2, Count = team2goals, Fill = color2, Title = "Goals Chart", ChartType = AccumulationType.Pie });
+
+        Wides.Add(new ChartData { Team = team1, Count = (Match.EventsByTeam(Match.Scores.ATeam).ToList()).Where(e => e.action01.stat.StartsWith("wide")).Count(), Fill = color1, Title = "Wides Chart", ChartType = AccumulationType.Pie });
+        Wides.Add(new ChartData { Team = team2, Count = (Match.EventsByTeam(Match.Scores.BTeam).ToList()).Where(e => e.action01.stat.StartsWith("wide")).Count(), Fill = color2, Title = "Wides Chart", ChartType = AccumulationType.Pie });
+
+
+        Points.Add(new ChartData { Team = team1, Count = team1points, Fill = color1, Title = "Points Chart", ChartType = AccumulationType.Pie });
+        Points.Add(new ChartData { Team = team2, Count = team2points, Fill = color2, Title = "Points Chart", ChartType = AccumulationType.Pie });
+
+        Scores.Add(new ChartData { Team = team1, Count =  team1scores, Fill = color1, Title = "Points Scored Chart", ChartType = AccumulationType.Pie });
+        Scores.Add(new ChartData { Team = team2, Count = team2scores, Fill = color2, Title = "Points Scored Chart", ChartType = AccumulationType.Pie });
+
+        Turnovers.Add(new ChartData { Team = team1, Count = team1turnovers, Fill = color1, Title = "Turnovers Chart", ChartType = AccumulationType.Pie });
+        Turnovers.Add(new ChartData { Team = team2, Count = team2turnovers, Fill = color1, Title = "Turnovers Chart", ChartType = AccumulationType.Pie });
+
+        ChartList.Add(Goals);
+        ChartList.Add(Points);
+        ChartList.Add(Scores);
+        ChartList.Add(Wides);
+        ChartList.Add(Frees);
+        ChartList.Add(Turnovers);
+
+                
+        
+        initialised = true;       
+    }
+}
