@@ -1,10 +1,14 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
-
+env:
+  PUBLISH_DIR: MatchStatCharts/bin/Debug/net9.0/wwwroot
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["master"]
+    paths:  
+      - MatchStatCharts/**
+    branches: 
+    - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,8 +35,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Get Latest .Net SDK
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        with:
+          dotnet-version: '10.0.x'
+      
+      - name: Publish app
+        run:  dotnet publish MatchStatsCharts -c Release
+
+      - name: Rewrite base href
+        uses: TheBoru/ghaction-rewrite-base-href@f797f3d0f16f5c44672f5408ecbb9eb6d617b17c # v1.1.0
+        with:
+          html_path: ${{ env.PUBLISH_DIR }}/index.html
+          base_href: /MatchStatCharts/
+        
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
